@@ -13,8 +13,6 @@ class ApplicationComposer
     @registry = {}
     @dependency_tree = {}
     @lifetime_scopes = { instance_per_lifetime: {}, instance_per_request: {} }
-    register_dependencies
-    build_dependency_trees
   end
 
   # dependency registration can be done through extreme metaprogramming
@@ -24,11 +22,15 @@ class ApplicationComposer
   # that's not the purpose of this exercise, so we will be going with explicit registration
   # which is less dry, but far simpler to implement
 
-  def register_dependencies
-    register(:i_am_the_main_class) { MainClass }
-    register(:i_am_dependency, :instance_per_lifetime) { DependentOne }
-    register(:some_other) { SomeOther }
-    register(:some_lamda) { -> { puts "yay" } }
+  def start
+    build_dependency_trees
+  end
+
+  def run(lamda, &block)
+    lamda.call(self) if lamda
+    block.call(self) if block_given?
+    binding.pry
+    @lifetime_scopes[:instance_per_request] = {}
   end
 
   def register(key, lifetime_scope = :instance_per_request, &block)

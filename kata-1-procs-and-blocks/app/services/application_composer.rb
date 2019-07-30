@@ -12,7 +12,7 @@ class ApplicationComposer
   def initialize
     @registry = {}
     @dependency_tree = {}
-    @registry = { i_am_the_main_class: MainClass, i_am_dependency: DependentOne, some_other: SomeOther, some_lamda: -> { puts "yay" } }
+    @lifetime_scopes = { instance_per_lifetime: {}, instance_per_request: {} }
     register_dependencies
     build_dependency_trees
   end
@@ -25,13 +25,14 @@ class ApplicationComposer
   # which is less dry, but far simpler to implement
 
   def register_dependencies
-    @i_am_a_dependency = -> (a, b) { puts a + b }
-    @i_am_the_main_class = -> { }
     register(:i_am_the_main_class) { MainClass }
+    register(:i_am_dependency, :instance_per_lifetime) { DependentOne }
+    register(:some_other) { SomeOther }
+    register(:some_lamda) { -> { puts "yay" } }
   end
 
-  def register(key, &block)
-    @registry[key] = block.call
+  def register(key, lifetime_scope = :instance_per_request, &block)
+    @registry[key] = { lifetime: lifetime_scope, value: block.call }
   end
 
   def build_dependency_trees
@@ -41,10 +42,10 @@ class ApplicationComposer
   end
 
   def get_dependencies(key)
-    if @registry[key].is_a?(Proc)
+    if @registry[key][:value].is_a?(Proc)
       return key
-    elsif @registry[key].is_a?(Class)
-      dependencies = @registry[key].instance_method(:initialize).parameters.map { |c| c[1] }
+    elsif @registry[key][:value].is_a?(Class)
+      dependencies = @registry[key][:value].instance_method(:initialize).parameters.map { |c| c[1] }
       if dependencies.size == 0
         return key
       else
@@ -64,11 +65,11 @@ class ApplicationComposer
   end
 
   def resolve_dependencies(key, dependencies)
-    if @registry[key].is_a?(Proc)
-      return @registry[key]
-    elsif @registry[key].is_a?(Class)
+    if @registry[key][:value].is_a?(Proc)
+      return @registry[key][:value]
+    elsif @registry[key][:value].is_a?(Class)
       if dependencies == nil || dependencies[key] == nil || dependencies.size == 0
-        return @registry[key].new
+        return instance_for_lifetime(key)
       else
         params = []
         dependencies[key].each do |dependency|
@@ -82,7 +83,21 @@ class ApplicationComposer
           end
           params << param_instances
         end
-        @registry[key].new(*params)
+        instance_for_lifetime(key, params)
+      end
+    end
+  end
+
+  def instance_for_lifetime(key, params = nil)
+    if @registry[key][:lifetime] == :instance_per_dependency
+      @registry[key].new(*params)
+    else
+      if already_created = @lifetime_scopes[@registry[key][:lifetime]][key]
+        return already_created
+      else
+        instance = params == nil ? @registry[key][:value].new : @registry[key][:value].new(*params)
+        @lifetime_scopes[@registry[key][:lifetime]][key] = instance
+        instance
       end
     end
   end

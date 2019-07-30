@@ -13,8 +13,8 @@ class ApplicationComposer
     @registry = {}
     @dependency_tree = {}
     @registry = { i_am_the_main_class: MainClass, i_am_dependency: DependentOne, some_other: SomeOther, some_lamda: -> { puts "yay" } }
-    #register_dependencies
-    #build_dependency_trees
+    register_dependencies
+    build_dependency_trees
   end
 
   # dependency registration can be done through extreme metaprogramming
@@ -31,7 +31,6 @@ class ApplicationComposer
   end
 
   def register(key, &block)
-    #MainClass.instance_method(:initialize).parameters.map { |c| c[1] }
     @registry[key] = block.call
   end
 
@@ -60,10 +59,32 @@ class ApplicationComposer
     end
   end
 
-  def f
-    #i_am_a_dependency = -> (a, b) { puts a + b }
-    @i_am_child_a.call
-    @i_am_a_dependency.call(1, 2)
+  def resolve(key)
+    resolve_dependencies(key, @dependency_tree[key])
+  end
+
+  def resolve_dependencies(key, dependencies)
+    if @registry[key].is_a?(Proc)
+      return @registry[key]
+    elsif @registry[key].is_a?(Class)
+      if dependencies == nil || dependencies[key] == nil || dependencies.size == 0
+        return @registry[key].new
+      else
+        params = []
+        dependencies[key].each do |dependency|
+          param_instances = nil
+          if dependency.is_a?(Hash)
+            dependency.each do |k, v|
+              param_instances = resolve_dependencies(k, dependency)
+            end
+          else
+            param_instances = resolve_dependencies(dependency, nil)
+          end
+          params << param_instances
+        end
+        @registry[key].new(*params)
+      end
+    end
   end
 
   #unnamed paramaters
@@ -73,15 +94,17 @@ class ApplicationComposer
 
     def initialize(i_am_dependency, some_other)
       @i_am_dependency = i_am_dependency
+      @some_other = some_other
     end
 
     def print
-      puts "#{@i_am_a_child}#{@test}#{@exit}"
+      puts "#{@i_am_a_child}#{@some_other}"
     end
   end
 
   class DependentOne
     def initialize(some_lamda)
+      @some_lamda = some_lamda
     end
   end
 

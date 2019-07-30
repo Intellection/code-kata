@@ -79,10 +79,17 @@ I haven't been able to complete specs yet, but they might be coming soon tm.
 ### Supplementary reading
 
 https://www.rubyguides.com/2016/02/ruby-procs-and-lambdas/
+
 https://medium.com/podiihq/ruby-blocks-procs-and-lambdas-bb6233f68843
+
 https://medium.com/@sihui/what-the-heck-are-code-blocks-procs-lambdas-and-closures-in-ruby-2b0737f08e95
+
 https://blog.appsignal.com/2018/09/04/ruby-magic-closures-in-ruby-blocks-procs-and-lambdas.html
+
 https://martinfowler.com/articles/injection.html
+
 https://deviq.com/dependency-inversion-principle/
+
 https://en.wikipedia.org/wiki/Dependency_inversion_principle
+
 https://en.wikipedia.org/wiki/Composition_over_inheritance

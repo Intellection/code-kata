@@ -1,14 +1,14 @@
 class RuntimeApp
   def initialize(runtime_params)
     @runtime_params = runtime_params
-    @runtime_params = { v: false }
+    @runtime_params = { v: true }
     @context = ApplicationComposer.new
     register_dependencies
     @context.start
   end
 
   def test
-    la = -> (method) { method.resolve(:i_am_the_main_class) }
+    la = -> (context) { context.resolve(:i_am_the_main_class).do_some_method }
     @context.run la
   end
 

@@ -1,14 +1,4 @@
 class ApplicationComposer
-  # for simplicity sake, we will be making use of constructor injection
-  #
-  #
-  # Lifetime Scopes:
-  #  - instance per dependency: everytime the dependency is required it creates a new instance of the object
-  #  - instance per request: for every use of the dependency, a single instance is used, the next call will require a new instance (think active record models and caching)
-  #  - instance per lifetime: While the application is running, there will only be a single instance used regardless of the amount of requests (think a singleton)
-  #
-  # if no lifetime scope is provided, instance per request is the default
-
   def initialize
     @registry = {}
     @dependency_tree = {}
@@ -27,10 +17,10 @@ class ApplicationComposer
   end
 
   def run(lamda, &block)
-    lamda.call(self) if lamda
     block.call(self) if block_given?
-    binding.pry
+    result = lamda.call(self) if lamda
     @lifetime_scopes[:instance_per_request] = {}
+    result
   end
 
   def register(key, lifetime_scope = :instance_per_request, &block)

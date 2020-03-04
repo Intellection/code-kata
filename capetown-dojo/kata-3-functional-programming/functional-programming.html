@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Awesome Presentation</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+      body { font-family: 'Droid Serif';}
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-slide-content { background-color:#000; color: #F92672; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Functional Programming
+## Herman Langner
+
+---
+
+# Overview
+- Functional programming is a programming style not a language type
+- Functional languages just strictly adhere to the principles of functional programming
+
+---
+# What is Functional programming
+
+```
+It is a declarative programming paradigm in that programming is done with expressions 
+or declarations instead of statements. In functional code, the output value of a function 
+depends only on its arguments, so calling a function with the same value for an 
+argument always produces the same result. This is in contrast to imperative programming 
+where, in addition to a function's arguments, global program state can affect a function's 
+resulting value
+```
+- directly copied from wikipedia
+
+### aims
+- more predictable code
+- easier to understand
+- more testable
+
+---
+# Functional Programming classifications
+1. Pure functions
+2. First-class functions
+3. Higher-order functions
+4. Referential transparency
+5. Closures
+
+---
+# Pure functions
+- given input x then the output will *always* be y
+```ruby
+#impure functions
+  base_number = 0
+  def increment_number(x)
+    base_number + x #This is impure because base_number can be changed
+                    # based on the state of the object so
+                    # depending on the state of the object x will return different values
+  end
+#pure functions
+  def increment_number(base_number, x)
+    base_number + x #pure because the output will always be the same for the same input
+  end
+```
+---
+# Pure functions
+- evaluation/execution has no side effects (static variables unchanged, mutable references unchanged)
+```ruby
+#impure functions
+  base_number = 0
+  def increment_number(x)
+    base_number++
+    base_number + x
+  end
+#pure functions
+  def increment_number(base_number, x)
+    base_number + x
+  end
+```
+---
+# First-class functions
+First-class functions is how a language supports functions as first class citizens.
+this is measured by:
+- Higher-order functions (next slide) passing functions as arguments
+- Anonymous and nested functions e.g. blocks in ruby
+- Non-local variables and closures
+---
+# Higher order functions
+A higher order function is a function that does at least one of
+- takes one or more functions as an argument
+- returns a function as a result
+
+`map` is a common example, it takes a collection and function as input
+and returns a collection with the function applied
+
+```ruby
+def gen_times(factor)
+  return Proc.new {|n| n*factor }
+end
+```
+---
+# Referential transparency
+just a honorable mention
+```c
+int globalValue = 0;
+
+int rq(int x) {
+  globalValue++;
+  return x + globalValue;
+}
+
+int rt(int x) {
+  return x + 1;
+}
+```
+---
+# Closures
+A closure refers to the value of something (like a variable or a function) in an outer scope 
+being available in the context of the inner scope, even if that inner scope is invoked much later
+```javascript
+let name = "Invader Zim"
+
+let printName = () => console.log(name);
+
+printName();
+
+name = "Invader Skoodge"
+
+printName();
+```
+```elixir
+defmodule Example do
+  def create_some_function() do
+    number = 3
+
+    fn -> IO.puts(number) end
+  end
+end
+
+some_function = Example.create_some_function()
+
+some_function.()
+```
+
+---
+# Extras
+---
+# Composition over inheritance
+Inheritance is when you design your types after what they are, 
+while composition is when you design your types after what they can do
+
+- Gorilla/banana problem, unused methods of base class
+```ruby
+dog            = pooper + barker
+cat            = pooper + meower
+cleaningRobot  = driver + cleaner
+murderRobot    = driver + killer
+murderRobotDog = driver + killer + barker
+```
+
+---
+# Composition over inheritance
+
+```ruby
+const barker = (state) => ({
+  bark: () => console.log('Woof, I am ' + state.name)
+})
+const driver = (state) => ({
+  drive: () => state.position = state.position + state.speed
+})
+
+const murderRobotDog = (name)  => {
+  let state = {
+    name,
+    speed: 100,
+    position: 0
+  }
+  return Object.assign(
+        {},
+        barker(state),
+        driver(state),
+        killer(state)
+    )
+}
+const bruno =  murderRobotDog('bruno')
+bruno.bark() // "Woof, I am Bruno"
+```
+
+---
+# Idempotency and scaling
+
+- the nature of functional programming enforces idempotency
+- when dealing with multiple apps and fault tolerance, idempotency simplifies a lot
+---
+# Function composition
+
+- properly using composition leads to pretty dry code
+```javascript
+const sum = arr => arr.reduce((i, runningSum) => i + runningSum);
+const average = (sum, count) => sum / count;
+const averageArr = arr => average(sum(arr), arr.length);
+```
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>

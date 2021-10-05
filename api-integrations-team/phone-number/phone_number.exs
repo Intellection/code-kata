@@ -20,9 +20,6 @@ defmodule Phone do
   """
   @spec number(String.t()) :: String.t()
   def number(raw) do
-    raw
-    |> match
-    |> to_string
   end
 
   @doc """

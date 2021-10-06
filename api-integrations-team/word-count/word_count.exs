@@ -7,6 +7,7 @@ defmodule Words do
   @spec count(String.t()) :: map()
   def count(sentence) do
     sentence
+    |> String.downcase()
     |> String.split()
     |> build_count_map()
   end
@@ -21,7 +22,8 @@ defmodule Words do
 
   defp upsert(word, acc) do
     # if it exists get it and add 1, if not its 1
-    value = acc[word]
+    value = (acc[word] || 0) + 1
     %{word => 1}
+    Map.put(acc,word,value)
   end
 end

@@ -3,10 +3,10 @@ defmodule ReverseRotate do
     num
     |> String.to_integer()
     |> Integer.digits()
-    |> Enum.chunk_every(sz, :discard)
-    |> Enum.map(&rotate/1)
+    |> Enum.chunk_every(sz, sz, :discard)
+    |> Enum.flat_map(&rotate/1)
     |> Enum.map(&Integer.to_string/1)
-    |> String.join()
+    |> Enum.join()
   end
 
   def rotate(nums = [h | t]) do
